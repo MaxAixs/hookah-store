@@ -1,0 +1,15 @@
+env: development
+
+http_server:
+  host: "localhost"
+  port: "8080"
+  read_header_timeout: 10s
+  write_timeout: 10s
+  idle_timeout: 60s
+
+database:
+  host: "localhost"
+  port: "5432"
+  username: "postgres"
+  db_name: "hookah_users"
+  ssl_mode: "disable"
