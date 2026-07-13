@@ -50,13 +50,13 @@ func (s *UserService) CreateUser(ctx context.Context, req models.CreateUserReque
 		UpdatedAt:    time.Now(),
 	}
 
-	if err := s.userRepo.Create(ctx, user); err != nil {
+	if err := s.userRepo.Create(ctx, nil, user); err != nil {
 		slog.Error("failed to create user", slog.String("fc", fc), slog.Any("error", err))
 
 		return nil, errs.MapErr(err)
 	}
 
-	userResponse := userToModelResponse(user)
+	userResponse := models.UserToResponse(user)
 
 	return userResponse, nil
 }
@@ -100,7 +100,7 @@ func (s *UserService) UpdateUserByID(ctx context.Context, id uuid.UUID, req mode
 		return nil, errs.MapErr(err)
 	}
 
-	userResponse := userToModelResponse(user)
+	userResponse := models.UserToResponse(user)
 
 	return userResponse, nil
 }
@@ -115,7 +115,7 @@ func (s *UserService) GetUserByID(ctx context.Context, id uuid.UUID) (*models.Us
 		return nil, errs.MapErr(err)
 	}
 
-	userResponse := userToModelResponse(user)
+	userResponse := models.UserToResponse(user)
 
 	return userResponse, nil
 }
@@ -130,14 +130,4 @@ func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
-}
-
-func userToModelResponse(user *models.User) *models.UserResponse {
-	return &models.UserResponse{
-		ID:        user.ID,
-		Email:     user.Email,
-		Role:      user.Role,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}
 }
