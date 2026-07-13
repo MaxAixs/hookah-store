@@ -5,10 +5,17 @@ import (
 
 	"github.com/anomalyco/hookah-store/user-service/internal/models"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
+type OutBoxRepository interface {
+	SaveEvent(ctx context.Context, tx *sqlx.Tx, event *models.OutboxEvent) error
+	FetchUnpublishedEvents(limit int) ([]models.OutboxEvent, error)
+	MarkPublishedEvents(ctx context.Context, id uuid.UUID) error
+}
+
 type UserRepository interface {
-	Create(ctx context.Context, user *models.User) error
+	Create(ctx context.Context, tx *sqlx.Tx, user *models.User) error
 	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	Update(ctx context.Context, user *models.User) error
 	Delete(ctx context.Context, id uuid.UUID) error
