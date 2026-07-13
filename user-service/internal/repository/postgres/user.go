@@ -21,12 +21,12 @@ func NewUserRepo(db *sqlx.DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
-func (r *UserRepo) Create(ctx context.Context, user *models.User) error {
+func (r *UserRepo) Create(ctx context.Context, tx *sqlx.DB, user *models.User) error {
 	query := `
 		INSERT INTO users (id, email, password_hash, role, created_at, updated_at)
 		VALUES (:id, :email, :password_hash, :role, :created_at, :updated_at)`
 
-	_, err := r.db.NamedExecContext(ctx, query, user)
+	_, err := tx.ExecContext(ctx, query, user)
 	if err != nil {
 		if IsEmailAlreadyExist(err) {
 			return errs.ErrUserAlreadyExists
