@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"time"
 
@@ -10,19 +11,23 @@ import (
 	"github.com/anomalyco/hookah-store/user-service/internal/repository"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
 
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
 )
 
 type AuthService struct {
-	userRepo repository.UserRepository
-	validate *validator.Validate
-	jwt      *jwtpkg.JwtConfig
+	db         *sqlx.DB
+	outBoxRepo repository.OutBoxRepository
+	userRepo   repository.UserRepository
+	validate   *validator.Validate
+	jwt        *jwtpkg.JwtConfig
 }
 
-func NewAuth(userRepo repository.UserRepository, jwtCfg *jwtpkg.JwtConfig) *AuthService {
+func NewAuth(db *sqlx.DB, userRepo repository.UserRepository, jwtCfg *jwtpkg.JwtConfig) *AuthService {
 	return &AuthService{
+		db:       db,
 		userRepo: userRepo,
 		validate: validator.New(),
 		jwt:      jwtCfg,
@@ -30,6 +35,7 @@ func NewAuth(userRepo repository.UserRepository, jwtCfg *jwtpkg.JwtConfig) *Auth
 }
 
 const userRole = "user"
+const userEventsTopic = "user.events"
 
 func (s *AuthService) SignUp(ctx context.Context, req models.AuthRequest) error {
 	const fc = "auth-service.services.CreateUser"
@@ -56,8 +62,42 @@ func (s *AuthService) SignUp(ctx context.Context, req models.AuthRequest) error 
 		UpdatedAt:    time.Now(),
 	}
 
-	if err := s.userRepo.Create(ctx, user); err != nil {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		slog.Error("failed to create transaction", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+	defer tx.Rollback()
+
+	if err := s.userRepo.Create(ctx, tx, user); err != nil {
 		slog.Error("failed to create user", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+
+	event := models.UserSignUpEvent{
+		UserID:    user.ID,
+		Email:     req.Email,
+		TimeStamp: user.CreatedAt,
+	}
+	payload, err := json.Marshal(event)
+	if err != nil {
+		slog.Error("failed to marshal event", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+
+	outBoxEvent := models.NewOutBoxEvent(userEventsTopic, user.ID.String(), payload)
+
+	if err := s.outBoxRepo.SaveEvent(ctx, tx, outBoxEvent); err != nil {
+		slog.Error("failed to save event", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		slog.Error("failed to commit", slog.String("fc", fc), slog.Any("error", err))
 
 		return errs.MapErr(err)
 	}
