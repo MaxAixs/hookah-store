@@ -36,6 +36,12 @@ type DBConfig struct {
 	SSLMode  string `mapstructure:"ssl_mode" yaml:"ssl_mode"`
 }
 
+type KafkaCfg struct {
+	Brokers      []string `mapstructure:"brokers" yaml:"brokers"`
+	RequiredAcks int      `mapstructure:"required_acks" yaml:"required_acks"`
+	Async        bool     `mapstructure:"async" yaml:"async"`
+}
+
 func New() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.AddConfigPath("config")
