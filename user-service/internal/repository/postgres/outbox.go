@@ -17,7 +17,7 @@ func NewOutboxRepo(db *sqlx.DB) *OutboxRepository {
 	return &OutboxRepository{db: db}
 }
 
-func (o *OutboxRepository) SaveEvent(ctx context.Context, tx *sqlx.Tx, event models.OutboxEvent) error {
+func (o *OutboxRepository) SaveEvent(ctx context.Context, tx *sqlx.Tx, event *models.OutboxEvent) error {
 	query := `
 		INSERT INTO outbox (id, topic, key, payload, created_at, published)
 		VALUES (:id, :topic, :key, :payload, :created_at, :published)`
@@ -30,14 +30,14 @@ func (o *OutboxRepository) SaveEvent(ctx context.Context, tx *sqlx.Tx, event mod
 	return nil
 }
 
-func (o *OutboxRepository) FetchUnpublishedEvents(ctx context.Context, limit int) ([]models.OutboxEvent, error) {
+func (o *OutboxRepository) FetchUnpublishedEvents(limit int) ([]models.OutboxEvent, error) {
 	query := `SELECT id, topic, key, payload, created_at
 			FROM outbox
 			WHERE published = false
 			ORDER BY created_at ASC
 			LIMIT $1`
 
-	rows, err := o.db.QueryxContext(ctx, query, limit)
+	rows, err := o.db.Queryx(query, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch unpublished events: %w", err)
 	}
