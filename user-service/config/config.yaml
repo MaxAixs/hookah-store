@@ -13,3 +13,9 @@ database:
   username: "postgres"
   db_name: "hookah_users"
   ssl_mode: "disable"
+
+kafka:
+  brokers:
+    - "localhost:9092"
+  required_acks: -1
+  async: false
