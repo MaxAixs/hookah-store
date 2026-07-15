@@ -76,7 +76,7 @@ func (s *AuthService) SignUp(ctx context.Context, req models.AuthRequest) error 
 		return errs.MapErr(err)
 	}
 
-	if err := s.publishAuthEvent(ctx, tx, user.ID, user.Email, time.Now()); err != nil {
+	if err := s.publishAuthEvent(ctx, tx, user.ID, user.Email, models.AuthEventSignUp, time.Now()); err != nil {
 		slog.Error("failed to publish auth event", slog.String("fc", fc), slog.Any("error", err))
 
 		return errs.MapErr(err)
@@ -160,7 +160,7 @@ func (s *AuthService) ResetPassword(ctx context.Context, req models.ResetPasswor
 		return errs.MapErr(err)
 	}
 
-	if err := s.publishAuthEvent(ctx, tx, user.ID, user.Email, user.CreatedAt); err != nil {
+	if err := s.publishAuthEvent(ctx, tx, user.ID, user.Email, models.AuthEventResetPassword, user.CreatedAt); err != nil {
 		slog.Error("failed to publish auth event", slog.String("fc", fc), slog.Any("error", err))
 
 		return errs.MapErr(err)
@@ -175,12 +175,14 @@ func (s *AuthService) ResetPassword(ctx context.Context, req models.ResetPasswor
 	return nil
 }
 
-func (s *AuthService) publishAuthEvent(ctx context.Context, tx *sqlx.Tx, userID uuid.UUID, email string, timeStamp time.Time) error {
+func (s *AuthService) publishAuthEvent(ctx context.Context, tx *sqlx.Tx, userID uuid.UUID, email string,
+	eventType models.AuthEventType, timeStamp time.Time) error {
 	const fc = "auth-service.services.publishAuthEvent"
 
 	event := models.UserAuthEvent{
 		UserID:    userID,
 		Email:     email,
+		EventType: eventType,
 		TimeStamp: timeStamp,
 	}
 
@@ -191,7 +193,7 @@ func (s *AuthService) publishAuthEvent(ctx context.Context, tx *sqlx.Tx, userID 
 		return errs.MapErr(err)
 	}
 
-	outBoxEvent := models.NewOutBoxEvent(userEventsTopic, userID.String(), payload)
+	outBoxEvent := models.NewOutBoxEvent(userEventsTopic, userID.String(), eventType, payload)
 
 	return s.outBoxRepo.SaveEvent(ctx, tx, outBoxEvent)
 }
