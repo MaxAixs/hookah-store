@@ -76,22 +76,8 @@ func (s *AuthService) SignUp(ctx context.Context, req models.AuthRequest) error 
 		return errs.MapErr(err)
 	}
 
-	event := models.UserSignUpEvent{
-		UserID:    user.ID,
-		Email:     req.Email,
-		TimeStamp: user.CreatedAt,
-	}
-	payload, err := json.Marshal(event)
-	if err != nil {
-		slog.Error("failed to marshal event", slog.String("fc", fc), slog.Any("error", err))
-
-		return errs.MapErr(err)
-	}
-
-	outBoxEvent := models.NewOutBoxEvent(userEventsTopic, user.ID.String(), payload)
-
-	if err := s.outBoxRepo.SaveEvent(ctx, tx, outBoxEvent); err != nil {
-		slog.Error("failed to save event", slog.String("fc", fc), slog.Any("error", err))
+	if err := s.publishAuthEvent(ctx, tx, user.ID, user.Email, time.Now()); err != nil {
+		slog.Error("failed to publish auth event", slog.String("fc", fc), slog.Any("error", err))
 
 		return errs.MapErr(err)
 	}
@@ -146,7 +132,7 @@ func (s *AuthService) ResetPassword(ctx context.Context, req models.ResetPasswor
 		return err
 	}
 
-	_, err := s.userRepo.GetByEmail(ctx, req.Email)
+	user, err := s.userRepo.GetByEmail(ctx, req.Email)
 	if err != nil {
 		slog.Error("failed to get user", slog.String("fc", fc), slog.Any("error", err))
 
@@ -160,11 +146,52 @@ func (s *AuthService) ResetPassword(ctx context.Context, req models.ResetPasswor
 		return errs.MapErr(err)
 	}
 
-	if err := s.userRepo.UpdatePassword(ctx, req.Email, string(passwordHash)); err != nil {
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		slog.Error("failed to create transaction", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+	defer tx.Rollback()
+
+	if err := s.userRepo.UpdatePassword(ctx, tx, req.Email, string(passwordHash)); err != nil {
 		slog.Error("failed to update password", slog.String("fc", fc), slog.Any("error", err))
 
 		return errs.MapErr(err)
 	}
 
+	if err := s.publishAuthEvent(ctx, tx, user.ID, user.Email, user.CreatedAt); err != nil {
+		slog.Error("failed to publish auth event", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		slog.Error("failed to commit", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+
 	return nil
+}
+
+func (s *AuthService) publishAuthEvent(ctx context.Context, tx *sqlx.Tx, userID uuid.UUID, email string, timeStamp time.Time) error {
+	const fc = "auth-service.services.publishAuthEvent"
+
+	event := models.UserAuthEvent{
+		UserID:    userID,
+		Email:     email,
+		TimeStamp: timeStamp,
+	}
+
+	payload, err := json.Marshal(event)
+	if err != nil {
+		slog.Error("failed to marshal event", slog.String("fc", fc), slog.Any("error", err))
+
+		return errs.MapErr(err)
+	}
+
+	outBoxEvent := models.NewOutBoxEvent(userEventsTopic, userID.String(), payload)
+
+	return s.outBoxRepo.SaveEvent(ctx, tx, outBoxEvent)
 }
