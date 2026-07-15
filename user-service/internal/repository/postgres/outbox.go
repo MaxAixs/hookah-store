@@ -19,8 +19,8 @@ func NewOutboxRepo(db *sqlx.DB) *OutboxRepository {
 
 func (o *OutboxRepository) SaveEvent(ctx context.Context, tx *sqlx.Tx, event *models.OutboxEvent) error {
 	query := `
-		INSERT INTO outbox (id, topic, key, payload, created_at, published)
-		VALUES (:id, :topic, :key, :payload, :created_at, :published)`
+		INSERT INTO outbox (id, topic, key, type, payload, created_at, published)
+		VALUES (:id, :topic, :key, :type, :payload, :created_at, :published)`
 
 	_, err := tx.NamedExecContext(ctx, query, event)
 	if err != nil {
@@ -31,7 +31,7 @@ func (o *OutboxRepository) SaveEvent(ctx context.Context, tx *sqlx.Tx, event *mo
 }
 
 func (o *OutboxRepository) FetchUnpublishedEvents(limit int) ([]models.OutboxEvent, error) {
-	query := `SELECT id, topic, key, payload, created_at
+	query := `SELECT id, topic, key, type, payload, created_at
 			FROM outbox
 			WHERE published = false
 			ORDER BY created_at ASC
