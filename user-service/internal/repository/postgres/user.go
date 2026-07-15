@@ -21,12 +21,12 @@ func NewUserRepo(db *sqlx.DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
-func (r *UserRepo) Create(ctx context.Context, tx *sqlx.DB, user *models.User) error {
+func (r *UserRepo) Create(ctx context.Context, tx *sqlx.Tx, user *models.User) error {
 	query := `
 		INSERT INTO users (id, email, password_hash, role, created_at, updated_at)
 		VALUES (:id, :email, :password_hash, :role, :created_at, :updated_at)`
 
-	_, err := tx.ExecContext(ctx, query, user)
+	_, err := tx.NamedExecContext(ctx, query, user)
 	if err != nil {
 		if IsEmailAlreadyExist(err) {
 			return errs.ErrUserAlreadyExists
@@ -114,7 +114,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 	return &user, nil
 }
 
-func (r *UserRepo) UpdatePassword(ctx context.Context, tx *sqlx.DB, email string, newPassword string) error {
+func (r *UserRepo) UpdatePassword(ctx context.Context, tx *sqlx.Tx, email string, newPassword string) error {
 	query := `UPDATE users SET password_hash = $1, updated_at = NOW() WHERE email = $2`
 
 	result, err := tx.ExecContext(ctx, query, newPassword, email)
