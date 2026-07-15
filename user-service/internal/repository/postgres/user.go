@@ -114,10 +114,10 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 	return &user, nil
 }
 
-func (r *UserRepo) UpdatePassword(ctx context.Context, email string, newPassword string) error {
+func (r *UserRepo) UpdatePassword(ctx context.Context, tx *sqlx.DB, email string, newPassword string) error {
 	query := `UPDATE users SET password_hash = $1, updated_at = NOW() WHERE email = $2`
 
-	result, err := r.db.ExecContext(ctx, query, newPassword, email)
+	result, err := tx.ExecContext(ctx, query, newPassword, email)
 	if err != nil {
 		return err
 	}
