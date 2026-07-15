@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/anomalyco/hookah-store/user-service/internal/config"
+	"github.com/anomalyco/hookah-store/user-service/internal/relay"
 	"github.com/anomalyco/hookah-store/user-service/internal/repository/postgres"
 	"github.com/anomalyco/hookah-store/user-service/internal/services"
 	"github.com/anomalyco/hookah-store/user-service/internal/transport/http"
@@ -16,6 +17,7 @@ import (
 	"github.com/anomalyco/hookah-store/user-service/internal/transport/http/handlers/auth"
 	"github.com/anomalyco/hookah-store/user-service/pkg/database"
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
+	kafkapkg "github.com/anomalyco/hookah-store/user-service/pkg/kafka"
 )
 
 const (
@@ -43,15 +45,20 @@ func Start() {
 
 	db, err := database.NewDB(&cfg.DataBase)
 	if err != nil {
-		slog.Error("failed to connect to database", err)
+		slog.Error("failed to connect to database", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 	defer db.Close()
 
 	userRepo := postgres.NewUserRepo(db)
+	outboxRepo := postgres.NewOutboxRepo(db)
 
 	jwtCfg := jwtpkg.New(cfg.JWT.Secret, cfg.JWT.TTL)
-	authService := services.NewAuth(userRepo, jwtCfg)
+
+	publisher := kafkapkg.NewPublisher(cfg.Kafka)
+	relaySrv := relay.NewOutboxRelay(outboxRepo, publisher)
+
+	authService := services.NewAuth(db, userRepo, jwtCfg)
 	userService := services.NewAdmin(userRepo)
 
 	adminHandlers := admin.New(userService)
@@ -65,18 +72,30 @@ func Start() {
 		}
 	}()
 
+	relayCtx, relayCancel := context.WithCancel(context.Background())
+	go func() {
+		if err := relaySrv.Run(relayCtx); err != nil && err != context.Canceled {
+			slog.Error("outbox relay failed", slog.String("err", err.Error()))
+		}
+	}()
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit
 
 	slog.Info("received shutdown signal", slog.String("signal", sig.String()))
 
+	relayCancel()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := httpServer.Shutdown(ctx); err != nil {
-		slog.Error("failed to shutdown server", "err", err)
-		os.Exit(1)
+		slog.Error("failed to shutdown server", slog.String("err", err.Error()))
+	}
+
+	if err := publisher.Close(); err != nil {
+		slog.Error("failed to close kafka publisher", slog.String("err", err.Error()))
 	}
 
 	slog.Info("service stopped", slog.String("service", serviceName))
