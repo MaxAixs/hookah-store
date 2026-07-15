@@ -16,19 +16,21 @@ type User struct {
 }
 
 type OutboxEvent struct {
-	ID        uuid.UUID `db:"id"`
-	Topic     string    `db:"topic"`
-	Key       string    `db:"key"`
-	Payload   []byte    `db:"payload"`
-	CreatedAt time.Time `db:"created_at"`
-	Published bool      `db:"published"`
+	ID        uuid.UUID     `db:"id"`
+	Topic     string        `db:"topic"`
+	Key       string        `db:"key"`
+	Type      AuthEventType `db:"type"`
+	Payload   []byte        `db:"payload"`
+	CreatedAt time.Time     `db:"created_at"`
+	Published bool          `db:"published"`
 }
 
-func NewOutBoxEvent(topic string, key string, payload []byte) *OutboxEvent {
+func NewOutBoxEvent(topic string, key string, eventType AuthEventType, payload []byte) *OutboxEvent {
 	return &OutboxEvent{
 		ID:        uuid.New(),
 		Topic:     topic,
 		Key:       key,
+		Type:      eventType,
 		Payload:   payload,
 		CreatedAt: time.Now(),
 	}
