@@ -12,6 +12,7 @@ type Config struct {
 	HTTPServer HTTPServerConfig `mapstructure:"http_server" yaml:"http_server"`
 	DataBase   DBConfig         `mapstructure:"database" yaml:"database"`
 	JWT        JWTConfig        `mapstructure:"jwt" yaml:"jwt"`
+	Kafka      KafkaCfg         `mapstructure:"kafka" yaml:"kafka"`
 }
 
 type JWTConfig struct {
