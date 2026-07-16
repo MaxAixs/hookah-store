@@ -10,11 +10,13 @@ import (
 
 	"github.com/anomalyco/hookah-store/user-service/internal/config"
 	"github.com/anomalyco/hookah-store/user-service/internal/relay"
-	"github.com/anomalyco/hookah-store/user-service/internal/repository/postgres"
-	"github.com/anomalyco/hookah-store/user-service/internal/services"
+	postgresoutbox "github.com/anomalyco/hookah-store/user-service/internal/repository/postgres/outbox"
+	postgresuser "github.com/anomalyco/hookah-store/user-service/internal/repository/postgres/user"
+	authservice "github.com/anomalyco/hookah-store/user-service/internal/services/auth"
+	userservice "github.com/anomalyco/hookah-store/user-service/internal/services/user"
 	"github.com/anomalyco/hookah-store/user-service/internal/transport/http"
 	"github.com/anomalyco/hookah-store/user-service/internal/transport/http/handlers/admin"
-	"github.com/anomalyco/hookah-store/user-service/internal/transport/http/handlers/auth"
+	authhandler "github.com/anomalyco/hookah-store/user-service/internal/transport/http/handlers/auth"
 	"github.com/anomalyco/hookah-store/user-service/pkg/database"
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
 	kafkapkg "github.com/anomalyco/hookah-store/user-service/pkg/kafka"
@@ -50,19 +52,19 @@ func Start() {
 	}
 	defer db.Close()
 
-	userRepo := postgres.NewUserRepo(db)
-	outboxRepo := postgres.NewOutboxRepo(db)
+	userRepo := postgresuser.New(db)
+	outboxRepo := postgresoutbox.New(db)
 
 	jwtCfg := jwtpkg.New(cfg.JWT.Secret, cfg.JWT.TTL)
 
 	publisher := kafkapkg.NewPublisher(cfg.Kafka)
 	relaySrv := relay.NewOutboxRelay(outboxRepo, publisher)
 
-	authService := services.NewAuth(db, userRepo, jwtCfg)
-	userService := services.NewAdmin(userRepo)
+	authService := authservice.New(db, userRepo, jwtCfg)
+	userService := userservice.New(userRepo)
 
 	adminHandlers := admin.New(userService)
-	authHandlers := auth.New(authService)
+	authHandlers := authhandler.New(authService)
 
 	httpServer := http.New(&cfg.HTTPServer, jwtCfg, authHandlers, adminHandlers)
 	go func() {

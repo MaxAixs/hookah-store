@@ -3,16 +3,16 @@ package auth
 import (
 	"github.com/anomalyco/hookah-store/user-service/internal/errs"
 	"github.com/anomalyco/hookah-store/user-service/internal/models"
-	"github.com/anomalyco/hookah-store/user-service/internal/services"
+	authservice "github.com/anomalyco/hookah-store/user-service/internal/services/auth"
 	"github.com/anomalyco/hookah-store/user-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 )
 
 type Handlers struct {
-	authService *services.AuthService
+	authService *authservice.Service
 }
 
-func New(authService *services.AuthService) http.Handler {
+func New(authService *authservice.Service) http.Handler {
 	return &Handlers{
 		authService: authService,
 	}
