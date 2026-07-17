@@ -9,7 +9,7 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-const fc = "notification-service_kafka_consumer"
+const fc = "notification-service.kafka.consumer"
 
 type EventHandler func(ctx context.Context, payload []byte) error
 

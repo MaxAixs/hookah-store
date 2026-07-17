@@ -34,10 +34,11 @@ var mapErrors = map[error]*RequestError{
 }
 
 func MapErr(err error) error {
-	err, ok := mapErrors[err]
-	if !ok {
-		return ErrInternal
+	var internalErr *InternalError
+
+	if errors.As(err, &internalErr) {
+		return mapErrors[err]
 	}
 
-	return err
+	return ErrInternal
 }

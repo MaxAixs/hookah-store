@@ -33,16 +33,16 @@ var (
 	ErrInvalidToken                   = &RequestError{Err: errors.New("invalid token or expired token")}
 )
 
-var ErrMap = map[*InternalError]*RequestError{
+var ErrMap = map[error]*RequestError{
 	ErrUserAlreadyExists: ErrUserWithThatEmailAlreadyExists,
 	ErrUserNotFound:      ErrInvalidCredentials,
 }
 
 func MapErr(err error) *RequestError {
-	for repoErr, reqErr := range ErrMap {
-		if errors.Is(err, repoErr) {
-			return reqErr
-		}
+	var internalErr *InternalError
+
+	if errors.As(err, &internalErr) {
+		return ErrMap[err]
 	}
 
 	return ErrInternal

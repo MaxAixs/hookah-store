@@ -7,11 +7,11 @@ import (
 )
 
 type Handlers struct {
-	notifService *adminservice.Service
+	adminService *adminservice.Service
 }
 
 func New(notifService *adminservice.Service) http.Handler {
-	return &Handlers{notifService: notifService}
+	return &Handlers{adminService: notifService}
 }
 
 func (h *Handlers) Register(router *gin.RouterGroup) {
@@ -27,9 +27,10 @@ func (h *Handlers) ShutDown() {}
 func (h *Handlers) GetByUserID(ctx *gin.Context) {
 	userID := ctx.Param("user_id")
 
-	notifications, err := h.notifService.GetByUserID(ctx, userID)
+	notifications, err := h.adminService.GetByUserID(ctx, userID)
 	if err != nil {
 		http.HandleServiceError(ctx, err)
+
 		return
 	}
 
@@ -39,9 +40,10 @@ func (h *Handlers) GetByUserID(ctx *gin.Context) {
 func (h *Handlers) GetByEmail(ctx *gin.Context) {
 	email := ctx.Param("email")
 
-	notifications, err := h.notifService.GetByEmail(ctx, email)
+	notifications, err := h.adminService.GetByEmail(ctx, email)
 	if err != nil {
 		http.HandleServiceError(ctx, err)
+
 		return
 	}
 

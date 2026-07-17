@@ -47,7 +47,7 @@ func toResponses(notifications []models.Notification) []models.NotificationRespo
 	resp := make([]models.NotificationResponse, 0, len(notifications))
 	for _, n := range notifications {
 		resp = append(resp, models.NotificationResponse{
-			ID:        n.ID,
+			ID:        n.ID.String(),
 			UserID:    n.UserID,
 			Email:     n.Email,
 			EventType: n.EventType,

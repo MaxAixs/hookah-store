@@ -27,21 +27,21 @@ func (e *EmailHandler) Register(handler kafka.Register) {
 }
 
 func (e *EmailHandler) SignUp(ctx context.Context, payload []byte) error {
-	var event models.Event
+	var event *models.Event
 
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return err
 	}
 
-	return nil
+	return e.emailService.CreateMsg(ctx, event)
 }
 
 func (e *EmailHandler) ResetPassword(ctx context.Context, payload []byte) error {
-	var event models.Event
+	var event *models.Event
 
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return err
 	}
 
-	return nil
+	return e.emailService.CreateMsg(ctx, event)
 }
