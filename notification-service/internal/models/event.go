@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type MailgunEvent struct {
+	ID        string    `json:"id"`
+	Event     string    `json:"event"`
+	Timestamp time.Time `json:"timestamp"`
+}
 type Event struct {
 	ID        uuid.UUID `json:"id"`
 	Topic     string    `json:"topic"`
@@ -22,7 +27,7 @@ type UserData struct {
 }
 
 type Message struct {
-	To   string `json:"email"`
-	Name string `json:"name"`
-	Body string `json:"body"`
+	To      string `json:"email"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
 }

@@ -7,5 +7,5 @@ import (
 )
 
 type Mailer interface {
-	SendMsg(ctx context.Context, msg models.Message) error
+	SendMsg(ctx context.Context, msg models.Message) (string, error)
 }

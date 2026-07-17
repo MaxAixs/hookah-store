@@ -40,6 +40,7 @@ type KafkaConfig struct {
 type MailGunConfig struct {
 	APIKey string `mapstructure:"api_key" yaml:"api_key"`
 	Domain string `mapstructure:"domain" yaml:"domain"`
+	From   string `mapstructure:"from" yaml:"from"`
 }
 
 func New() (*Config, error) {
