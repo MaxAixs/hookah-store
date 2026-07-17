@@ -11,7 +11,7 @@ type NotificationResponse struct {
 	UserID    uuid.UUID `json:"user_id"`
 	Email     string    `json:"email"`
 	EventType string    `json:"event_type"`
-	Status    Status    `json:"status"`
+	Status    MsgStatus `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
