@@ -2,6 +2,7 @@ package email
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -25,15 +26,21 @@ func New(repo repository.NotificationRepository, mailgun mailgun.Mailer) *Servic
 	}
 }
 
-func (s *Service) CreateMsg(ctx context.Context, event *models.Event) error {
+func (s *Service) CreateMsg(ctx context.Context, event *models.Event, eventType string) error {
 	const fc = "notification-service.service.CreateMsg"
+
+	if event.Type != models.SignUpEventType && event.Type != models.ResetPasswordEventType {
+		slog.Error("unsupported event type %s", event.Type)
+
+		return fmt.Errorf("unknown event type: %s", event.Type)
+	}
 
 	notification := &models.Notification{
 		ID:        uuid.New(),
-		UserID:    event.Payload.UserID,
-		EventID:   event.ID,
-		Email:     event.Payload.Email,
-		EventType: event.Type,
+		UserID:    event.UserID,
+		EventID:   uuid.New(),
+		Email:     event.Email,
+		EventType: eventType,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -42,26 +49,26 @@ func (s *Service) CreateMsg(ctx context.Context, event *models.Event) error {
 	if err != nil {
 		slog.Error("failed to create notification", slog.String("fc", fc), slog.Any("error", err))
 
-		return errs.MapErr(err)
+		return err
 	}
 
 	msg := models.Message{
-		To:      event.Payload.Email,
-		Subject: event.Type,
-		Body:    messages.MapMsg[event.Type],
+		To:      event.Email,
+		Subject: eventType,
+		Body:    messages.MapMsg[eventType],
 	}
 
 	msgID, err := s.mailgun.SendMsg(ctx, msg)
 	if err != nil {
 		slog.Error("failed to send email", slog.String("fc", fc), slog.Any("error", err))
 
-		return errs.MapErr(err)
+		return err
 	}
 
 	if err := s.repo.UpdateMessageID(ctx, id, msgID); err != nil {
 		slog.Error("failed to update message ID", slog.String("fc", fc), slog.Any("error", err))
 
-		return errs.MapErr(err)
+		return err
 	}
 
 	return nil

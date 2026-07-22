@@ -22,26 +22,15 @@ func New(service *emailservice.Service, topic string) *EmailHandler {
 }
 
 func (e *EmailHandler) Register(handler kafka.Register) {
-	handler.RegisterHandler(e.topic, e.SignUp)
-	handler.RegisterHandler(e.topic, e.ResetPassword)
+	handler.RegisterHandler(e.topic, e.Handle)
 }
 
-func (e *EmailHandler) SignUp(ctx context.Context, payload []byte) error {
-	var event *models.Event
+func (e *EmailHandler) Handle(ctx context.Context, payload []byte) error {
+	var event models.Event
 
 	if err := json.Unmarshal(payload, &event); err != nil {
 		return err
 	}
 
-	return e.emailService.CreateMsg(ctx, event)
-}
-
-func (e *EmailHandler) ResetPassword(ctx context.Context, payload []byte) error {
-	var event *models.Event
-
-	if err := json.Unmarshal(payload, &event); err != nil {
-		return err
-	}
-
-	return e.emailService.CreateMsg(ctx, event)
+	return e.emailService.CreateMsg(ctx, &event, event.Type)
 }

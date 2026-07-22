@@ -6,24 +6,22 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	SignUpEventType        = "sign_up"
+	ResetPasswordEventType = "reset_password"
+)
+
 type MailgunEvent struct {
 	ID        string    `json:"id"`
 	Event     string    `json:"event"`
 	Timestamp time.Time `json:"timestamp"`
 }
-type Event struct {
-	ID        uuid.UUID `json:"id"`
-	Topic     string    `json:"topic"`
-	Key       string    `json:"key"`
-	Type      string    `json:"type"`
-	Payload   UserData  `json:"payload"`
-	CreatedAt time.Time `json:"created_at"`
-}
 
-type UserData struct {
+type Event struct {
 	UserID    uuid.UUID `json:"user_id"`
 	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
+	Type      string    `json:"event_type"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type Message struct {
