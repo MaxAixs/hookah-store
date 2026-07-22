@@ -25,12 +25,13 @@ type Service struct {
 	jwt        *jwtpkg.JwtConfig
 }
 
-func New(db *sqlx.DB, userRepo repository.UserRepository, jwtCfg *jwtpkg.JwtConfig) *Service {
+func New(db *sqlx.DB, userRepo repository.UserRepository, outBoxRepo repository.OutBoxRepository, jwtCfg *jwtpkg.JwtConfig) *Service {
 	return &Service{
-		db:       db,
-		userRepo: userRepo,
-		validate: validator.New(),
-		jwt:      jwtCfg,
+		db:         db,
+		userRepo:   userRepo,
+		outBoxRepo: outBoxRepo,
+		validate:   validator.New(),
+		jwt:        jwtCfg,
 	}
 }
 
@@ -126,7 +127,7 @@ func (s *Service) SignIn(ctx context.Context, req models.AuthRequest) (string, e
 func (s *Service) ResetPassword(ctx context.Context, req models.ResetPasswordRequest) error {
 	const fc = "auth-service.services.ResetPassword"
 
-	if err := s.validate.Struct(req.NewPassword); err != nil {
+	if err := s.validate.Struct(req); err != nil {
 		slog.Error("validation failed", slog.String("fc", fc), slog.Any("error", err))
 
 		return err
@@ -182,6 +183,7 @@ func (s *Service) publishAuthEvent(ctx context.Context, tx *sqlx.Tx, userID uuid
 	event := models.UserAuthEvent{
 		UserID:    userID,
 		Email:     email,
+		EventType: eventType,
 		TimeStamp: timeStamp,
 	}
 
