@@ -75,6 +75,8 @@ func setConfigEnv(cfg *Config) error {
 		return fmt.Errorf("read .env: %w", err)
 	}
 
+	mergeRootEnv()
+
 	cfg.DataBase.Password = viper.GetString("postgres_password")
 	if cfg.DataBase.Password == "" {
 		return fmt.Errorf("db_password is required")
@@ -91,4 +93,16 @@ func setConfigEnv(cfg *Config) error {
 	}
 
 	return nil
+}
+
+func mergeRootEnv() {
+	root := viper.New()
+	root.SetConfigName(".env")
+	root.AddConfigPath("..")
+	root.SetConfigType("env")
+	if err := root.ReadInConfig(); err == nil {
+		for _, k := range root.AllKeys() {
+			viper.Set(k, root.Get(k))
+		}
+	}
 }
