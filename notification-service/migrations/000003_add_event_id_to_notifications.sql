@@ -1,0 +1,5 @@
+-- +goose Up
+ALTER TABLE notifications ADD COLUMN event_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+
+-- +goose Down
+ALTER TABLE notifications DROP COLUMN IF EXISTS event_id;
