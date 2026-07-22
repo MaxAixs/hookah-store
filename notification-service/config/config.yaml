@@ -9,7 +9,7 @@ http_server:
 
 database:
   host: "localhost"
-  port: "5432"
+  port: "5433"
   username: "postgres"
   db_name: "hookah_notifications"
   ssl_mode: "disable"
@@ -17,5 +17,9 @@ database:
 kafka:
   brokers:
     - "localhost:9092"
+  group_id: "notification-service"
   required_acks: -1
   async: false
+
+mailgun:
+  from: "support@sandbox01b70f53b1714b2a88faa250ebbcc234.mailgun.org"
