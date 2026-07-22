@@ -1,13 +1,18 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/anomalyco/hookah-store/user-service/internal/errs"
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrInvalidToken = errors.New("invalid token or expired token")
+	ErrAccessDenied = errors.New("access denied")
 )
 
 const adminRole = "admin"
@@ -23,7 +28,7 @@ func RequireAuth(jwtCfg *jwtpkg.JwtConfig) gin.HandlerFunc {
 
 		_, err = jwtCfg.Validate(tokenString)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errs.ErrInvalidToken.Error())
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, ErrInvalidToken.Error())
 
 			return
 		}
@@ -43,7 +48,7 @@ func RequireRole(jwtCfg *jwtpkg.JwtConfig, roles ...string) gin.HandlerFunc {
 
 		claims, err := jwtCfg.Validate(tokenString)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errs.ErrInvalidToken.Error())
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, ErrInvalidToken.Error())
 
 			return
 		}
@@ -56,7 +61,7 @@ func RequireRole(jwtCfg *jwtpkg.JwtConfig, roles ...string) gin.HandlerFunc {
 			}
 		}
 
-		ctx.AbortWithStatusJSON(http.StatusForbidden, errs.ErrAccessDenied.Error())
+		ctx.AbortWithStatusJSON(http.StatusForbidden, ErrAccessDenied.Error())
 	}
 }
 

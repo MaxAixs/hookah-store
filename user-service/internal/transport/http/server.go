@@ -21,7 +21,7 @@ func New(cfg *config.HTTPServerConfig, jwtCfg *jwt.JwtConfig, userHandlers Handl
 	router := gin.New()
 
 	api := router.Group("/api")
-	apiAdmin := router.Group("/api", auth.RequireAdminRole(jwtCfg))
+	apiAdmin := router.Group("/api/admin", auth.RequireAdminRole(jwtCfg))
 	userHandlers.Register(api)
 	adminHandlers.Register(apiAdmin)
 

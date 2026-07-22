@@ -18,7 +18,7 @@ func New(adminService *userservice.Service) http.Handler {
 }
 
 func (h *Handlers) Register(router *gin.RouterGroup) {
-	adminGroup := router.Group("/admin/users")
+	adminGroup := router.Group("/users")
 	{
 		adminGroup.POST("", h.CreateUser)
 		adminGroup.PUT("/:id", h.UpdateUserByID)

@@ -60,7 +60,7 @@ func Start() {
 	publisher := kafkapkg.NewPublisher(cfg.Kafka)
 	relaySrv := relay.NewOutboxRelay(outboxRepo, publisher)
 
-	authService := authservice.New(db, userRepo, jwtCfg)
+	authService := authservice.New(db, userRepo, outboxRepo, jwtCfg)
 	userService := userservice.New(userRepo)
 
 	adminHandlers := admin.New(userService)
