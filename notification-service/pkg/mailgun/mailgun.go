@@ -22,10 +22,17 @@ func New(cfg config.MailGunConfig) *Client {
 }
 
 func (c *Client) SendMsg(ctx context.Context, msg models.Message) (string, error) {
-	newMsg := mailgun.NewMessage(c.cfg.Domain, c.cfg.From, msg.Subject, msg.Body, msg.To)
-	if newMsg == nil {
-		return "", fmt.Errorf("new Message is nil")
+	switch  {
+	case c.cfg.Domain == "" || c.cfg.From == "":
+		return "", fmt.Errorf("mailgun config is not set: domain=%q from=%q", c.cfg.Domain, c.cfg.From)
+	case msg.To == "":
+		return "", fmt.Errorf("recipient email is empty")
+	case msg.Body == "":
+		return "", fmt.Errorf("message body is empty")
 	}
+
+
+	newMsg := mailgun.NewMessage(c.cfg.Domain, c.cfg.From, msg.Subject, msg.Body, msg.To)
 
 	resp, err := c.mg.Send(ctx, newMsg)
 	if err != nil {

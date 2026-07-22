@@ -7,6 +7,8 @@ import (
 	"net/http"
 
 	"github.com/anomalyco/hookah-store/notification-service/internal/config"
+	"github.com/anomalyco/hookah-store/user-service/pkg/auth"
+	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,13 +17,13 @@ type Server struct {
 	router *gin.Engine
 }
 
-func New(cfg *config.HTTPServerConfig, handlers ...Handler) *Server {
+func New(cfg *config.HTTPServerConfig, jwtCfg *jwtpkg.JwtConfig, webhookHandlers Handler, adminHandlers Handler) *Server {
 	router := gin.New()
 
 	api := router.Group("/api")
-	for _, h := range handlers {
-		h.Register(api)
-	}
+	adminApi := router.Group("/api/admin", auth.RequireAdminRole(jwtCfg))
+	webhookHandlers.Register(api)
+	adminHandlers.Register(adminApi)
 
 	return &Server{
 		srv: &http.Server{
@@ -36,7 +38,7 @@ func New(cfg *config.HTTPServerConfig, handlers ...Handler) *Server {
 }
 
 func (s *Server) Run() error {
-	slog.Info("server listening on", "addr", s.srv.Addr)
+	slog.Info("server listening on", slog.String("addr", s.srv.Addr))
 	return s.srv.ListenAndServe()
 }
 

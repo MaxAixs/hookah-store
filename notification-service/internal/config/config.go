@@ -13,6 +13,12 @@ type Config struct {
 	DataBase   DBConfig         `mapstructure:"database" yaml:"database"`
 	Kafka      KafkaConfig      `mapstructure:"kafka" yaml:"kafka"`
 	MailGun    MailGunConfig    `mapstructure:"mailgun" yaml:"mailgun"`
+	JWT        JWTConfig        `mapstructure:"jwt" yaml:"jwt"`
+}
+
+type JWTConfig struct {
+	Secret string
+	TTL    time.Duration
 }
 
 type HTTPServerConfig struct {
@@ -75,6 +81,8 @@ func setConfigEnv(cfg *Config) error {
 		return fmt.Errorf("read .env: %w", err)
 	}
 
+	mergeRootEnv()
+
 	cfg.DataBase.Password = viper.GetString("postgres_password")
 	if cfg.DataBase.Password == "" {
 		return fmt.Errorf("db_password is required")
@@ -90,5 +98,27 @@ func setConfigEnv(cfg *Config) error {
 		return fmt.Errorf("mailgun_domain is required")
 	}
 
+	cfg.JWT.Secret = viper.GetString("jwt_secret")
+	if cfg.JWT.Secret == "" {
+		return fmt.Errorf("jwt_secret is required")
+	}
+
+	cfg.JWT.TTL = viper.GetDuration("jwt_ttl")
+	if cfg.JWT.TTL == 0 {
+		cfg.JWT.TTL = 24 * time.Hour
+	}
+
 	return nil
+}
+
+func mergeRootEnv() {
+	root := viper.New()
+	root.SetConfigName(".env")
+	root.AddConfigPath("..")
+	root.SetConfigType("env")
+	if err := root.ReadInConfig(); err == nil {
+		for _, k := range root.AllKeys() {
+			viper.Set(k, root.Get(k))
+		}
+	}
 }

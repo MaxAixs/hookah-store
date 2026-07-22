@@ -15,10 +15,10 @@ func New(notifService *adminservice.Service) http.Handler {
 }
 
 func (h *Handlers) Register(router *gin.RouterGroup) {
-	adminGroup := router.Group("/admin/notifications")
+	router.Group("/notifications")
 	{
-		adminGroup.GET("/user/:user_id", h.GetByUserID)
-		adminGroup.GET("/email/:email", h.GetByEmail)
+		router.GET("user/:user_id", h.GetByUserID)
+		router.GET("email/:email", h.GetByEmail)
 	}
 }
 

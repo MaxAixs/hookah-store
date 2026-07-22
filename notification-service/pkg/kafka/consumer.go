@@ -45,7 +45,6 @@ func (c *Consumer) Start(ctx context.Context) error {
 		GroupID:     c.cfg.GroupID,
 		GroupTopics: topics,
 	})
-	defer c.Close()
 
 	return c.handleMessages(ctx)
 }
