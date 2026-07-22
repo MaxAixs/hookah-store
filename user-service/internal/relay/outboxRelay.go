@@ -31,7 +31,7 @@ func (r *OutboxRelay) Run(ctx context.Context) error {
 			return ctx.Err()
 		case <-ticker.C:
 			if err := r.publishBatch(ctx); err != nil {
-				return err
+				slog.Error("outbox relay batch failed", slog.Any("error", err))
 			}
 		}
 	}
@@ -54,7 +54,7 @@ func (r *OutboxRelay) publishBatch(ctx context.Context) error {
 		if err != nil {
 			slog.Error("failed to publish event", slog.Any("error", err))
 
-			return err
+			continue
 		}
 		if err := r.outBoxRepo.MarkPublishedEvents(ctx, e.ID); err != nil {
 			slog.Error("failed to mark published event", slog.Any("error", err))

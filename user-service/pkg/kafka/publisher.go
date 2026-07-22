@@ -15,10 +15,11 @@ type Publisher struct {
 func NewPublisher(cfg config.KafkaCfg) *Publisher {
 	return &Publisher{
 		writer: kafka.Writer{
-			Addr:         kafka.TCP(cfg.Brokers...),
-			Balancer:     &kafka.Hash{},
-			RequiredAcks: kafka.RequiredAcks(cfg.RequiredAcks),
-			Async:        cfg.Async,
+			Addr:                   kafka.TCP(cfg.Brokers...),
+			Balancer:               &kafka.Hash{},
+			RequiredAcks:           kafka.RequiredAcks(cfg.RequiredAcks),
+			Async:                  cfg.Async,
+			AllowAutoTopicCreation: true,
 		},
 	}
 }
