@@ -19,8 +19,9 @@ func (e *RequestError) Error() string {
 }
 
 var (
-	ErrUserNotFound  = &InternalError{Err: errors.New("user not found")}
-	ErrEmailNotFound = &InternalError{Err: errors.New("email not found")}
+	ErrUserNotFound     = &InternalError{Err: errors.New("user not found")}
+	ErrEmailNotFound    = &InternalError{Err: errors.New("email not found")}
+	ErrInvalidSignature = &InternalError{Err: errors.New("invalid signature")}
 )
 
 var (

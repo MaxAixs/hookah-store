@@ -25,15 +25,12 @@ func (h *Handlers) Register(router *gin.RouterGroup) {
 func (h *Handlers) ShutDown() {}
 
 func (h *Handlers) MailgunWebhook(ctx *gin.Context) {
-	var mailgunEvent models.MailgunEvent
-
-	if err := ctx.ShouldBind(&mailgunEvent); err != nil {
+	var mailgunData models.MailgunWebhook
+	if err := ctx.ShouldBind(&mailgunData); err != nil {
 		ctx.Status(http.StatusBadRequest)
-
-		return
 	}
 
-	if err := h.EmailService.UpdateStatus(ctx, mailgunEvent); err != nil {
+	if err := h.EmailService.UpdateStatus(ctx, mailgunData); err != nil {
 		ctx.Status(http.StatusInternalServerError)
 
 		return

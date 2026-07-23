@@ -11,12 +11,6 @@ const (
 	ResetPasswordEventType = "reset_password"
 )
 
-type MailgunEvent struct {
-	ID        string    `json:"id"`
-	Event     string    `json:"event"`
-	Timestamp time.Time `json:"timestamp"`
-}
-
 type Event struct {
 	UserID    uuid.UUID `json:"user_id"`
 	Email     string    `json:"email"`
