@@ -3,6 +3,7 @@ package mailgun
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/anomalyco/hookah-store/notification-service/internal/config"
 	"github.com/anomalyco/hookah-store/notification-service/internal/models"
@@ -22,7 +23,7 @@ func New(cfg config.MailGunConfig) *Client {
 }
 
 func (c *Client) SendMsg(ctx context.Context, msg models.Message) (string, error) {
-	switch  {
+	switch {
 	case c.cfg.Domain == "" || c.cfg.From == "":
 		return "", fmt.Errorf("mailgun config is not set: domain=%q from=%q", c.cfg.Domain, c.cfg.From)
 	case msg.To == "":
@@ -31,7 +32,6 @@ func (c *Client) SendMsg(ctx context.Context, msg models.Message) (string, error
 		return "", fmt.Errorf("message body is empty")
 	}
 
-
 	newMsg := mailgun.NewMessage(c.cfg.Domain, c.cfg.From, msg.Subject, msg.Body, msg.To)
 
 	resp, err := c.mg.Send(ctx, newMsg)
@@ -39,5 +39,7 @@ func (c *Client) SendMsg(ctx context.Context, msg models.Message) (string, error
 		return "", fmt.Errorf("failed to send email: %w", err)
 	}
 
-	return resp.ID, nil
+	newID := strings.Trim(resp.ID, "<>")
+
+	return newID, nil
 }

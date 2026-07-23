@@ -44,9 +44,10 @@ type KafkaConfig struct {
 }
 
 type MailGunConfig struct {
-	APIKey string `mapstructure:"api_key" yaml:"api_key"`
-	Domain string `mapstructure:"domain" yaml:"domain"`
-	From   string `mapstructure:"from" yaml:"from"`
+	APIKey            string `mapstructure:"api_key" yaml:"api_key"`
+	Domain            string `mapstructure:"domain" yaml:"domain"`
+	From              string `mapstructure:"from" yaml:"from"`
+	WebhookSigningKey string `mapstructure:"webhook_signing_key" yaml:"webhook_signing_key"`
 }
 
 func New() (*Config, error) {
@@ -96,6 +97,11 @@ func setConfigEnv(cfg *Config) error {
 	cfg.MailGun.Domain = viper.GetString("mailgun_domain")
 	if cfg.MailGun.Domain == "" {
 		return fmt.Errorf("mailgun_domain is required")
+	}
+
+	cfg.MailGun.WebhookSigningKey = viper.GetString("mailgun_webhook_signing_key")
+	if cfg.MailGun.WebhookSigningKey == "" {
+		return fmt.Errorf("mailgun_webhook_signing_key is required")
 	}
 
 	cfg.JWT.Secret = viper.GetString("jwt_secret")

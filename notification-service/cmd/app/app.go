@@ -57,7 +57,7 @@ func Start() {
 	mailgunClient := mailgunpkg.New(cfg.MailGun)
 
 	adminService := admin.New(notifRepo)
-	emailService := emailservice.New(notifRepo, mailgunClient)
+	emailService := emailservice.New(notifRepo, cfg.MailGun.WebhookSigningKey, mailgunClient)
 
 	jwtCfg := jwtpkg.New(cfg.JWT.Secret, cfg.JWT.TTL)
 
