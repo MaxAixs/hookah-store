@@ -57,17 +57,17 @@ func (r *Repo) UpdateMessageID(ctx context.Context, id uuid.UUID, msgID string) 
 	return nil
 }
 
-func (r *Repo) UpdateStatus(ctx context.Context, msgID string, status models.MsgStatus) error {
-	query := `UPDATE notifications SET status = $1, updated_at = NOW() WHERE message_id = $2`
+func (r *Repo) UpdateStatus(ctx context.Context, email string, msgID string, status models.MsgStatus) error {
+	query := `UPDATE notifications SET status = $1, updated_at = NOW() WHERE message_id = $2 AND email = $3`
 
-	result, err := r.db.ExecContext(ctx, query, string(status), msgID)
+	result, err := r.db.ExecContext(ctx, query, string(status), msgID, email)
 	if err != nil {
 		return fmt.Errorf("failed to update status: %w", err)
 	}
 
 	rows, _ := result.RowsAffected()
 	if rows == 0 {
-		return fmt.Errorf("notification with message_id %s not found", msgID)
+		return fmt.Errorf("notification with message_id %s and email %s not found", msgID, email)
 	}
 
 	return nil
