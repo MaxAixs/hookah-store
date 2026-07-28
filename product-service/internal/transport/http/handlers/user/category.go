@@ -11,11 +11,7 @@ type CategoryHandler struct {
 	categoryService *categoryservice.CategoryService
 }
 
-func NewCategoryHandler(categoryService *categoryservice.CategoryService) *CategoryHandler {
-	return &CategoryHandler{categoryService: categoryService}
-}
-
-func (h *CategoryHandler) RegisterPublic(router *gin.RouterGroup) {
+func (h *CategoryHandler) registerRoutes(router *gin.RouterGroup) {
 	categories := router.Group("/categories")
 	{
 		categories.GET("/:slug", h.GetCategoryBySlug)

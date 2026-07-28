@@ -10,11 +10,7 @@ type ProductHandler struct {
 	productService *productservice.ProductService
 }
 
-func NewProductHandler(productService *productservice.ProductService) *ProductHandler {
-	return &ProductHandler{productService: productService}
-}
-
-func (h *ProductHandler) RegisterPublic(router *gin.RouterGroup) {
+func (h *ProductHandler) registerRoutes(router *gin.RouterGroup) {
 	products := router.Group("/products")
 	{
 		products.GET("", h.GetAllProducts)

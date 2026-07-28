@@ -62,13 +62,11 @@ func Start() {
 	inventoryService := inventoryservice.New(productRepo)
 
 	adminHandler := admin.NewAdminHandler(categoryService, productService, inventoryService)
-
-	userCategoryHandler := userhandlers.NewCategoryHandler(categoryService)
-	userProductHandler := userhandlers.NewProductHandler(productService)
+	userHandler := userhandlers.NewUserHandler(categoryService, productService)
 
 	httpServer := http.New(&cfg.HTTPServer, jwtCfg,
 		[]http.Handler{adminHandler},
-		[]http.PublicHandler{userCategoryHandler, userProductHandler},
+		[]http.PublicHandler{userHandler},
 	)
 	go func() {
 		if err := httpServer.Run(); err != nil && !errors.Is(err, stdhttp.ErrServerClosed) {
