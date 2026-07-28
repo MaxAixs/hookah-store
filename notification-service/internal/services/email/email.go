@@ -35,7 +35,7 @@ func (s *Service) CreateMsg(ctx context.Context, event *models.Event, eventType 
 	const fc = "notification-service.service.CreateMsg"
 
 	if event.Type != models.SignUpEventType && event.Type != models.ResetPasswordEventType {
-		slog.Error("unsupported event type %s", event.Type)
+		slog.Error("unsupported event type", slog.String("event_type", event.Type))
 
 		return fmt.Errorf("unknown event type: %s", event.Type)
 	}
