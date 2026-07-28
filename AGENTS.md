@@ -77,18 +77,21 @@ Use interfaces between layers.
 
 ### Repository separation
 
-Each repository struct must be split by domain concern, each in its own file:
+A repository struct is shared per domain entity — one struct implements all
+data-access methods for its table(s):
 
--   `auth.go` — `AuthRepo` implements `AuthRepository` (auth operations: `GetByEmail`, `UpdatePassword`)
--   `user.go` — `UserRepo` implements `UserRepository` (user CRUD: `Create`, `GetByID`, `Update`, `Delete`)
+-   `user.go` — `Repo` implements both `AuthRepository` and `UserRepository`
 
-This is a general architectural rule: every repository has its own zone of responsibility. Do not mix concerns in one file.
+Interfaces, however, must be split by domain concern:
 
-Repository methods must be on the correct receiver type (`*AuthRepo` or `*UserRepo`), not mixed.
+-   `AuthRepository` — auth operations: `GetByEmail`, `UpdatePassword`
+-   `UserRepository` — user CRUD: `Create`, `GetByID`, `Update`, `Delete`
 
 Interfaces are defined in `internal/repository/interface.go`.
 
-Services depend on interfaces, not concrete types. Each service receives only the repositories it needs:
+Services depend on interfaces, not concrete types. Each service receives only
+the interfaces it needs — the same shared repository struct may be passed as
+several interfaces:
 
 -   `AuthService` — needs both `AuthRepository` (sign-in, password reset) and `UserRepository` (sign-up creates user)
 -   `AdminService` — needs only `UserRepository`
@@ -293,6 +296,11 @@ When modifying code:
 -   explain architectural decisions
 -   do not introduce new technologies without discussion
 -   ASK before making any changes — do not modify files or create new ones without explicit user approval
+-   commit granularly: one logical change per commit — never bundle
+    unrelated changes (feature, refactor, fix, chore, docs) into a single commit
+-   Development stage: write the project first — do NOT run live request
+    verification (curl, E2E runs against running services). Running and
+    testing requests happens only at the testing stage.
 
 Goal:
 
