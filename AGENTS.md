@@ -297,6 +297,7 @@ When modifying code:
 -   do not introduce new technologies without discussion
 -   ASK before making any changes — do not modify files or create new ones without explicit user approval
 -   NEVER git push without explicit user command — always ask before pushing
+-   NEVER git commit without explicit user command — always ask before committing
 -   commit granularly: one logical change per commit — never bundle
     unrelated changes (feature, refactor, fix, chore, docs) into a single commit
 -   Development stage: write the project first — do NOT run live request
