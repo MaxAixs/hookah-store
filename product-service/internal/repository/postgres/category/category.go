@@ -66,6 +66,25 @@ func (r *Repo) GetByID(ctx context.Context, id uuid.UUID) (*models.Category, err
 	return &category, nil
 }
 
+func (r *Repo) GetBySlug(ctx context.Context, slug string) (*models.Category, error) {
+	query := `
+		SELECT id, name, slug, COALESCE(description, '') AS description, created_at, updated_at
+		FROM categories
+		WHERE slug = $1`
+
+	var category models.Category
+	err := r.db.GetContext(ctx, &category, query, slug)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errs.ErrCategoryNotFound
+		}
+
+		return nil, err
+	}
+
+	return &category, nil
+}
+
 func (r *Repo) GetAll(ctx context.Context) ([]models.Category, error) {
 	query := `
 		SELECT id, name, slug, COALESCE(description, '') AS description, created_at, updated_at

@@ -14,9 +14,11 @@ import (
 	postgrescategory "github.com/anomalyco/hookah-store/product-service/internal/repository/postgres/category"
 	postgresproduct "github.com/anomalyco/hookah-store/product-service/internal/repository/postgres/product"
 	categoryservice "github.com/anomalyco/hookah-store/product-service/internal/services/category"
+	inventoryservice "github.com/anomalyco/hookah-store/product-service/internal/services/inventory"
 	productservice "github.com/anomalyco/hookah-store/product-service/internal/services/product"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http/handlers/admin"
+	userhandlers "github.com/anomalyco/hookah-store/product-service/internal/transport/http/handlers/user"
 	"github.com/anomalyco/hookah-store/product-service/pkg/database"
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
 )
@@ -57,11 +59,19 @@ func Start() {
 
 	categoryService := categoryservice.New(categoryRepo)
 	productService := productservice.New(db, productRepo, productRepo)
+	inventoryService := inventoryservice.New(productRepo)
 
 	categoryHandlers := admin.NewCategoryHandlers(categoryService)
 	productHandlers := admin.NewProductHandlers(productService)
+	inventoryHandlers := admin.NewInventoryHandlers(inventoryService)
 
-	httpServer := http.New(&cfg.HTTPServer, jwtCfg, productHandlers, categoryHandlers)
+	userCategoryHandler := userhandlers.NewCategoryHandler(categoryService)
+	userProductHandler := userhandlers.NewProductHandler(productService)
+
+	httpServer := http.New(&cfg.HTTPServer, jwtCfg,
+		[]http.Handler{productHandlers, categoryHandlers, inventoryHandlers},
+		[]http.PublicHandler{userCategoryHandler, userProductHandler},
+	)
 	go func() {
 		if err := httpServer.Run(); err != nil && !errors.Is(err, stdhttp.ErrServerClosed) {
 			slog.Error("failed to start http server", slog.String("err", err.Error()))

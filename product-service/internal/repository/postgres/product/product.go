@@ -147,6 +147,20 @@ func (r *Repo) GetProductByID(ctx context.Context, productID uuid.UUID) (*models
 	return &inventory, nil
 }
 
+func (r *Repo) GetAllInventory(ctx context.Context) ([]models.Inventory, error) {
+	query := `
+		SELECT product_id, quantity, reserved, updated_at
+		FROM inventory
+		ORDER BY updated_at`
+
+	var inventories []models.Inventory
+	if err := r.db.SelectContext(ctx, &inventories, query); err != nil {
+		return nil, err
+	}
+
+	return inventories, nil
+}
+
 func (r *Repo) UpdateProduct(ctx context.Context, inventory *models.Inventory) error {
 	query := `
 		UPDATE inventory

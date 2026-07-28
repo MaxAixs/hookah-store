@@ -11,6 +11,7 @@ import (
 type CategoryRepository interface {
 	Create(ctx context.Context, category *models.Category) error
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Category, error)
+	GetBySlug(ctx context.Context, slug string) (*models.Category, error)
 	GetAll(ctx context.Context) ([]models.Category, error)
 	Update(ctx context.Context, category *models.Category) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -27,5 +28,6 @@ type ProductRepository interface {
 type InventoryRepository interface {
 	AddProduct(ctx context.Context, tx *sqlx.Tx, inventoryProduct *models.Inventory) error
 	GetProductByID(ctx context.Context, productID uuid.UUID) (*models.Inventory, error)
+	GetAllInventory(ctx context.Context) ([]models.Inventory, error)
 	UpdateProduct(ctx context.Context, inventoryProduct *models.Inventory) error
 }

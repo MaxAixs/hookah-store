@@ -13,15 +13,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Service struct {
+type ProductService struct {
 	db            *sqlx.DB
 	productRepo   repository.ProductRepository
 	inventoryRepo repository.InventoryRepository
 	validate      *validator.Validate
 }
 
-func New(db *sqlx.DB, productRepo repository.ProductRepository, inventoryRepo repository.InventoryRepository) *Service {
-	return &Service{
+func New(db *sqlx.DB, productRepo repository.ProductRepository, inventoryRepo repository.InventoryRepository) *ProductService {
+	return &ProductService{
 		db:            db,
 		productRepo:   productRepo,
 		inventoryRepo: inventoryRepo,
@@ -29,7 +29,7 @@ func New(db *sqlx.DB, productRepo repository.ProductRepository, inventoryRepo re
 	}
 }
 
-func (s *Service) CreateProduct(ctx context.Context, req models.CreateProductRequest) (*models.ProductResponse, error) {
+func (s *ProductService) CreateProduct(ctx context.Context, req models.CreateProductRequest) (*models.ProductResponse, error) {
 	const fc = "product-service.services.CreateProduct"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -85,7 +85,7 @@ func (s *Service) CreateProduct(ctx context.Context, req models.CreateProductReq
 	return models.ProductToResponse(product), nil
 }
 
-func (s *Service) GetProductByID(ctx context.Context, id uuid.UUID) (*models.ProductResponse, error) {
+func (s *ProductService) GetProductByID(ctx context.Context, id uuid.UUID) (*models.ProductResponse, error) {
 	const fc = "product-service.services.GetProductByID"
 
 	product, err := s.productRepo.GetByID(ctx, id)
@@ -98,7 +98,7 @@ func (s *Service) GetProductByID(ctx context.Context, id uuid.UUID) (*models.Pro
 	return models.ProductToResponse(product), nil
 }
 
-func (s *Service) GetAllProducts(ctx context.Context) ([]*models.ProductResponse, error) {
+func (s *ProductService) GetAllProducts(ctx context.Context) ([]*models.ProductResponse, error) {
 	const fc = "product-service.services.GetAllProducts"
 
 	products, err := s.productRepo.GetAll(ctx)
@@ -116,7 +116,7 @@ func (s *Service) GetAllProducts(ctx context.Context) ([]*models.ProductResponse
 	return responses, nil
 }
 
-func (s *Service) UpdateProduct(ctx context.Context, id uuid.UUID, req models.UpdateProductRequest) (*models.ProductResponse, error) {
+func (s *ProductService) UpdateProduct(ctx context.Context, id uuid.UUID, req models.UpdateProductRequest) (*models.ProductResponse, error) {
 	const fc = "product-service.services.UpdateProduct"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -162,7 +162,7 @@ func applyProductUpdates(product *models.Product, req models.UpdateProductReques
 	product.UpdatedAt = time.Now()
 }
 
-func (s *Service) DeleteProduct(ctx context.Context, id uuid.UUID) error {
+func (s *ProductService) DeleteProduct(ctx context.Context, id uuid.UUID) error {
 	const fc = "product-service.services.DeleteProduct"
 
 	if err := s.productRepo.Delete(ctx, id); err != nil {
@@ -172,33 +172,4 @@ func (s *Service) DeleteProduct(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
-}
-
-func (s *Service) UpdateInventory(ctx context.Context, productID uuid.UUID, req models.UpdateInventoryRequest) (*models.InventoryResponse, error) {
-	const fc = "product-service.services.UpdateInventory"
-
-	if err := s.validate.Struct(req); err != nil {
-		slog.Error("validation failed", slog.String("fc", fc), slog.Any("error", err))
-
-		return nil, err
-	}
-
-	inventory, err := s.inventoryRepo.GetProductByID(ctx, productID)
-	if err != nil {
-		slog.Error("failed to get inventory", slog.String("fc", fc), slog.Any("error", err))
-
-		return nil, errs.MapErr(err)
-	}
-
-	inventory.Quantity = req.Quantity
-	inventory.Reserved = req.Reserved
-	inventory.UpdatedAt = time.Now()
-
-	if err := s.inventoryRepo.UpdateProduct(ctx, inventory); err != nil {
-		slog.Error("failed to update inventory", slog.String("fc", fc), slog.Any("error", err))
-
-		return nil, errs.MapErr(err)
-	}
-
-	return models.InventoryToResponse(inventory), nil
 }

@@ -10,10 +10,10 @@ import (
 )
 
 type ProductHandlers struct {
-	productService *productservice.Service
+	productService *productservice.ProductService
 }
 
-func NewProductHandlers(productService *productservice.Service) http.Handler {
+func NewProductHandlers(productService *productservice.ProductService) http.Handler {
 	return &ProductHandlers{productService: productService}
 }
 
@@ -25,7 +25,6 @@ func (h *ProductHandlers) Register(router *gin.RouterGroup) {
 		productGroup.GET("/:id", h.GetProductByID)
 		productGroup.PUT("/:id", h.UpdateProduct)
 		productGroup.DELETE("/:id", h.DeleteProduct)
-		productGroup.PUT("/:id/inventory", h.UpdateInventory)
 	}
 }
 
@@ -122,30 +121,4 @@ func (h *ProductHandlers) DeleteProduct(ctx *gin.Context) {
 	}
 
 	http.OK(ctx, nil, "product deleted successfully")
-}
-
-func (h *ProductHandlers) UpdateInventory(ctx *gin.Context) {
-	id, err := uuid.Parse(ctx.Param(paramProductID))
-	if err != nil {
-		http.BadRequest(ctx, errs.ErrInvalidProductID)
-
-		return
-	}
-
-	var req models.UpdateInventoryRequest
-
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		http.BadRequest(ctx, errs.ErrInvalidRequestBody)
-
-		return
-	}
-
-	inventory, err := h.productService.UpdateInventory(ctx, id, req)
-	if err != nil {
-		http.HandleServiceError(ctx, err)
-
-		return
-	}
-
-	http.OK(ctx, inventory, "inventory updated successfully")
 }

@@ -17,9 +17,13 @@ type Server struct {
 	router *gin.Engine
 }
 
-func New(cfg *config.HTTPServerConfig, jwtCfg *jwtpkg.JwtConfig, adminHandlers ...Handler) *Server {
+func New(cfg *config.HTTPServerConfig, jwtCfg *jwtpkg.JwtConfig, adminHandlers []Handler, publicHandlers []PublicHandler) *Server {
 	router := gin.New()
 
+	api := router.Group("/api")
+	for _, h := range publicHandlers {
+		h.RegisterPublic(api)
+	}
 
 	apiAdmin := router.Group("/api/admin", auth.RequireAdminRole(jwtCfg))
 	for _, h := range adminHandlers {

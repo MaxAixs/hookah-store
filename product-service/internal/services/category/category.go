@@ -12,19 +12,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type Service struct {
+type CategoryService struct {
 	categoryRepo repository.CategoryRepository
 	validate     *validator.Validate
 }
 
-func New(categoryRepo repository.CategoryRepository) *Service {
-	return &Service{
+func New(categoryRepo repository.CategoryRepository) *CategoryService {
+	return &CategoryService{
 		categoryRepo: categoryRepo,
 		validate:     validator.New(),
 	}
 }
 
-func (s *Service) CreateCategory(ctx context.Context, req models.CreateCategoryRequest) (*models.CategoryResponse, error) {
+func (s *CategoryService) CreateCategory(ctx context.Context, req models.CreateCategoryRequest) (*models.CategoryResponse, error) {
 	const fc = "product-service.services.CreateCategory"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -51,7 +51,7 @@ func (s *Service) CreateCategory(ctx context.Context, req models.CreateCategoryR
 	return models.CategoryToResponse(category), nil
 }
 
-func (s *Service) GetCategoryByID(ctx context.Context, id uuid.UUID) (*models.CategoryResponse, error) {
+func (s *CategoryService) GetCategoryByID(ctx context.Context, id uuid.UUID) (*models.CategoryResponse, error) {
 	const fc = "product-service.services.GetCategoryByID"
 
 	category, err := s.categoryRepo.GetByID(ctx, id)
@@ -64,7 +64,20 @@ func (s *Service) GetCategoryByID(ctx context.Context, id uuid.UUID) (*models.Ca
 	return models.CategoryToResponse(category), nil
 }
 
-func (s *Service) GetAllCategories(ctx context.Context) ([]*models.CategoryResponse, error) {
+func (s *CategoryService) GetCategoryBySlug(ctx context.Context, slug string) (*models.CategoryResponse, error) {
+	const fc = "product-service.services.GetCategoryBySlug"
+
+	category, err := s.categoryRepo.GetBySlug(ctx, slug)
+	if err != nil {
+		slog.Error("failed to get category by slug", slog.String("fc", fc), slog.Any("error", err))
+
+		return nil, errs.MapErr(err)
+	}
+
+	return models.CategoryToResponse(category), nil
+}
+
+func (s *CategoryService) GetAllCategories(ctx context.Context) ([]*models.CategoryResponse, error) {
 	const fc = "product-service.services.GetAllCategories"
 
 	categories, err := s.categoryRepo.GetAll(ctx)
@@ -82,7 +95,7 @@ func (s *Service) GetAllCategories(ctx context.Context) ([]*models.CategoryRespo
 	return responses, nil
 }
 
-func (s *Service) UpdateCategory(ctx context.Context, id uuid.UUID, req models.UpdateCategoryRequest) (*models.CategoryResponse, error) {
+func (s *CategoryService) UpdateCategory(ctx context.Context, id uuid.UUID, req models.UpdateCategoryRequest) (*models.CategoryResponse, error) {
 	const fc = "product-service.services.UpdateCategory"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -122,7 +135,7 @@ func applyCategoryUpdates(category *models.Category, req models.UpdateCategoryRe
 	category.UpdatedAt = time.Now()
 }
 
-func (s *Service) DeleteCategory(ctx context.Context, id uuid.UUID) error {
+func (s *CategoryService) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 	const fc = "product-service.services.DeleteCategory"
 
 	if err := s.categoryRepo.Delete(ctx, id); err != nil {
