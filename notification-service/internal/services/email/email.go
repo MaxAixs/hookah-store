@@ -17,21 +17,21 @@ import (
 	"github.com/google/uuid"
 )
 
-type Service struct {
+type EmailService struct {
 	repo       repository.NotificationRepository
 	signingKey string
 	mailgun    mailgun.Mailer
 }
 
-func New(repo repository.NotificationRepository, signingKey string, mailgun mailgun.Mailer) *Service {
-	return &Service{
+func New(repo repository.NotificationRepository, signingKey string, mailgun mailgun.Mailer) *EmailService {
+	return &EmailService{
 		repo:       repo,
 		signingKey: signingKey,
 		mailgun:    mailgun,
 	}
 }
 
-func (s *Service) CreateMsg(ctx context.Context, event *models.Event, eventType string) error {
+func (s *EmailService) CreateMsg(ctx context.Context, event *models.Event, eventType string) error {
 	const fc = "notification-service.service.CreateMsg"
 
 	if event.Type != models.SignUpEventType && event.Type != models.ResetPasswordEventType {
@@ -81,7 +81,7 @@ func (s *Service) CreateMsg(ctx context.Context, event *models.Event, eventType 
 	return nil
 }
 
-func (s *Service) UpdateStatus(ctx context.Context, mailgunData models.MailgunWebhook) error {
+func (s *EmailService) UpdateStatus(ctx context.Context, mailgunData models.MailgunWebhook) error {
 	const fc = "notification-service.service.UpdateStatus"
 
 	if err := verifySignature(s.signingKey, mailgunData.Signature.Timestamp, mailgunData.Signature.Token,

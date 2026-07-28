@@ -6,15 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handlers struct {
-	adminService *adminservice.Service
+type AdminHandlers struct {
+	adminService *adminservice.AdminService
 }
 
-func New(notifService *adminservice.Service) http.Handler {
-	return &Handlers{adminService: notifService}
+func New(notifService *adminservice.AdminService) http.Handler {
+	return &AdminHandlers{adminService: notifService}
 }
 
-func (h *Handlers) Register(router *gin.RouterGroup) {
+func (h *AdminHandlers) Register(router *gin.RouterGroup) {
 	notif := router.Group("/notifications")
 	{
 		notif.GET("user/:user_id", h.GetByUserID)
@@ -22,9 +22,9 @@ func (h *Handlers) Register(router *gin.RouterGroup) {
 	}
 }
 
-func (h *Handlers) ShutDown() {}
+func (h *AdminHandlers) ShutDown() {}
 
-func (h *Handlers) GetByUserID(ctx *gin.Context) {
+func (h *AdminHandlers) GetByUserID(ctx *gin.Context) {
 	userID := ctx.Param("user_id")
 
 	notifications, err := h.adminService.GetByUserID(ctx, userID)
@@ -37,7 +37,7 @@ func (h *Handlers) GetByUserID(ctx *gin.Context) {
 	http.OK(ctx, notifications, "notifications retrieved successfully")
 }
 
-func (h *Handlers) GetByEmail(ctx *gin.Context) {
+func (h *AdminHandlers) GetByEmail(ctx *gin.Context) {
 	email := ctx.Param("email")
 
 	notifications, err := h.adminService.GetByEmail(ctx, email)

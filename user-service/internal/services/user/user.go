@@ -13,19 +13,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Service struct {
+type UserService struct {
 	userRepo repository.UserRepository
 	validate *validator.Validate
 }
 
-func New(userRepo repository.UserRepository) *Service {
-	return &Service{
+func New(userRepo repository.UserRepository) *UserService {
+	return &UserService{
 		userRepo: userRepo,
 		validate: validator.New(),
 	}
 }
 
-func (s *Service) CreateUser(ctx context.Context, req models.CreateUserRequest) (*models.UserResponse, error) {
+func (s *UserService) CreateUser(ctx context.Context, req models.CreateUserRequest) (*models.UserResponse, error) {
 	const fc = "user-service.services.CreateUser"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -61,7 +61,7 @@ func (s *Service) CreateUser(ctx context.Context, req models.CreateUserRequest) 
 	return userResponse, nil
 }
 
-func (s *Service) UpdateUserByID(ctx context.Context, id uuid.UUID, req models.UpdateUserRequest) (*models.UserResponse, error) {
+func (s *UserService) UpdateUserByID(ctx context.Context, id uuid.UUID, req models.UpdateUserRequest) (*models.UserResponse, error) {
 	const fc = "user-service.services.UpdateUser"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -105,7 +105,7 @@ func (s *Service) UpdateUserByID(ctx context.Context, id uuid.UUID, req models.U
 	return userResponse, nil
 }
 
-func (s *Service) GetUserByID(ctx context.Context, id uuid.UUID) (*models.UserResponse, error) {
+func (s *UserService) GetUserByID(ctx context.Context, id uuid.UUID) (*models.UserResponse, error) {
 	const fc = "user-service.services.GetUserByID"
 
 	user, err := s.userRepo.GetByID(ctx, id)
@@ -120,7 +120,7 @@ func (s *Service) GetUserByID(ctx context.Context, id uuid.UUID) (*models.UserRe
 	return userResponse, nil
 }
 
-func (s *Service) DeleteUser(ctx context.Context, id uuid.UUID) error {
+func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	const fc = "user-service.services.DeleteUser"
 
 	if err := s.userRepo.Delete(ctx, id); err != nil {

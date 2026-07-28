@@ -17,7 +17,7 @@ import (
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
 )
 
-type Service struct {
+type AuthService struct {
 	db         *sqlx.DB
 	outBoxRepo repository.OutBoxRepository
 	authRepo   repository.AuthRepository
@@ -26,8 +26,8 @@ type Service struct {
 	jwt        *jwtpkg.JwtConfig
 }
 
-func New(db *sqlx.DB, authRepo repository.AuthRepository, userRepo repository.UserRepository, outBoxRepo repository.OutBoxRepository, jwtCfg *jwtpkg.JwtConfig) *Service {
-	return &Service{
+func New(db *sqlx.DB, authRepo repository.AuthRepository, userRepo repository.UserRepository, outBoxRepo repository.OutBoxRepository, jwtCfg *jwtpkg.JwtConfig) *AuthService {
+	return &AuthService{
 		db:         db,
 		authRepo:   authRepo,
 		userRepo:   userRepo,
@@ -40,7 +40,7 @@ func New(db *sqlx.DB, authRepo repository.AuthRepository, userRepo repository.Us
 const userRole = "user"
 const userEventsTopic = "user.events"
 
-func (s *Service) SignUp(ctx context.Context, req models.AuthRequest) error {
+func (s *AuthService) SignUp(ctx context.Context, req models.AuthRequest) error {
 	const fc = "auth-service.services.CreateUser"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -94,7 +94,7 @@ func (s *Service) SignUp(ctx context.Context, req models.AuthRequest) error {
 	return nil
 }
 
-func (s *Service) SignIn(ctx context.Context, req models.AuthRequest) (string, error) {
+func (s *AuthService) SignIn(ctx context.Context, req models.AuthRequest) (string, error) {
 	const fc = "auth-service.services.SignIn"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -126,7 +126,7 @@ func (s *Service) SignIn(ctx context.Context, req models.AuthRequest) (string, e
 	return token, nil
 }
 
-func (s *Service) ResetPassword(ctx context.Context, req models.ResetPasswordRequest) error {
+func (s *AuthService) ResetPassword(ctx context.Context, req models.ResetPasswordRequest) error {
 	const fc = "auth-service.services.ResetPassword"
 
 	if err := s.validate.Struct(req); err != nil {
@@ -178,7 +178,7 @@ func (s *Service) ResetPassword(ctx context.Context, req models.ResetPasswordReq
 	return nil
 }
 
-func (s *Service) publishAuthEvent(ctx context.Context, tx *sqlx.Tx, userID uuid.UUID, email string,
+func (s *AuthService) publishAuthEvent(ctx context.Context, tx *sqlx.Tx, userID uuid.UUID, email string,
 	eventType models.AuthEventType, timeStamp time.Time) error {
 	const fc = "auth-service.services.publishAuthEvent"
 

@@ -10,11 +10,11 @@ import (
 )
 
 type EmailHandler struct {
-	emailService *emailservice.Service
+	emailService *emailservice.EmailService
 	topic        string
 }
 
-func New(service *emailservice.Service, topic string) *EmailHandler {
+func New(service *emailservice.EmailService, topic string) *EmailHandler {
 	return &EmailHandler{
 		emailService: service,
 		topic:        topic,

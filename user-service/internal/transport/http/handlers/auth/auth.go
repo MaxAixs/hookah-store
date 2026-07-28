@@ -8,17 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handlers struct {
-	authService *authservice.Service
+type AuthHandlers struct {
+	authService *authservice.AuthService
 }
 
-func New(authService *authservice.Service) http.Handler {
-	return &Handlers{
+func New(authService *authservice.AuthService) http.Handler {
+	return &AuthHandlers{
 		authService: authService,
 	}
 }
 
-func (h *Handlers) Register(router *gin.RouterGroup) {
+func (h *AuthHandlers) Register(router *gin.RouterGroup) {
 	authGroup := router.Group("/auth")
 	{
 		authGroup.POST("/sign-up", h.SignUp)
@@ -27,9 +27,9 @@ func (h *Handlers) Register(router *gin.RouterGroup) {
 	}
 }
 
-func (h *Handlers) ShutDown() {}
+func (h *AuthHandlers) ShutDown() {}
 
-func (h *Handlers) SignUp(ctx *gin.Context) {
+func (h *AuthHandlers) SignUp(ctx *gin.Context) {
 	var req models.AuthRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -47,7 +47,7 @@ func (h *Handlers) SignUp(ctx *gin.Context) {
 	http.OK(ctx, "user successfully signed up")
 }
 
-func (h *Handlers) SignIn(ctx *gin.Context) {
+func (h *AuthHandlers) SignIn(ctx *gin.Context) {
 	var req models.AuthRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -66,7 +66,7 @@ func (h *Handlers) SignIn(ctx *gin.Context) {
 	http.OK(ctx, token, "user successfully signed in")
 }
 
-func (h *Handlers) ResetPassword(ctx *gin.Context) {
+func (h *AuthHandlers) ResetPassword(ctx *gin.Context) {
 	var req models.ResetPasswordRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {

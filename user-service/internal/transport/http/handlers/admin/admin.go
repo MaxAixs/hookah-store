@@ -9,15 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type Handlers struct {
-	userService *userservice.Service
+type AdminHandlers struct {
+	userService *userservice.UserService
 }
 
-func New(adminService *userservice.Service) http.Handler {
-	return &Handlers{userService: adminService}
+func New(adminService *userservice.UserService) http.Handler {
+	return &AdminHandlers{userService: adminService}
 }
 
-func (h *Handlers) Register(router *gin.RouterGroup) {
+func (h *AdminHandlers) Register(router *gin.RouterGroup) {
 	adminGroup := router.Group("/users")
 	{
 		adminGroup.POST("", h.CreateUser)
@@ -27,11 +27,11 @@ func (h *Handlers) Register(router *gin.RouterGroup) {
 	}
 }
 
-func (h *Handlers) ShutDown() {}
+func (h *AdminHandlers) ShutDown() {}
 
 const paramUserID = "id"
 
-func (h *Handlers) CreateUser(ctx *gin.Context) {
+func (h *AdminHandlers) CreateUser(ctx *gin.Context) {
 	var req models.CreateUserRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -50,7 +50,7 @@ func (h *Handlers) CreateUser(ctx *gin.Context) {
 	http.OK(ctx, user, "user created successfully")
 }
 
-func (h *Handlers) UpdateUserByID(ctx *gin.Context) {
+func (h *AdminHandlers) UpdateUserByID(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param(paramUserID))
 	if err != nil {
 		http.BadRequest(ctx, errs.ErrInvalidUserID)
@@ -76,7 +76,7 @@ func (h *Handlers) UpdateUserByID(ctx *gin.Context) {
 	http.OK(ctx, user, "user updated successfully")
 }
 
-func (h *Handlers) GetUserByID(ctx *gin.Context) {
+func (h *AdminHandlers) GetUserByID(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param(paramUserID))
 	if err != nil {
 		http.BadRequest(ctx, errs.ErrInvalidUserID)
@@ -92,7 +92,7 @@ func (h *Handlers) GetUserByID(ctx *gin.Context) {
 	http.OK(ctx, user, "user retrieved successfully")
 }
 
-func (h *Handlers) DeleteUserByID(ctx *gin.Context) {
+func (h *AdminHandlers) DeleteUserByID(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param(paramUserID))
 	if err != nil {
 		http.BadRequest(ctx, errs.ErrInvalidUserID)

@@ -8,23 +8,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handlers struct {
-	EmailService *email.Service
+type WebhookHandlers struct {
+	EmailService *email.EmailService
 }
 
-func New(emailService *email.Service) *Handlers {
-	return &Handlers{
+func New(emailService *email.EmailService) *WebhookHandlers {
+	return &WebhookHandlers{
 		EmailService: emailService,
 	}
 }
 
-func (h *Handlers) Register(router *gin.RouterGroup) {
+func (h *WebhookHandlers) Register(router *gin.RouterGroup) {
 	router.POST("/webhook/mailgun", h.MailgunWebhook)
 }
 
-func (h *Handlers) ShutDown() {}
+func (h *WebhookHandlers) ShutDown() {}
 
-func (h *Handlers) MailgunWebhook(ctx *gin.Context) {
+func (h *WebhookHandlers) MailgunWebhook(ctx *gin.Context) {
 	var mailgunData models.MailgunWebhook
 	if err := ctx.ShouldBind(&mailgunData); err != nil {
 		ctx.Status(http.StatusBadRequest)

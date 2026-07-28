@@ -9,15 +9,15 @@ import (
 	"github.com/anomalyco/hookah-store/notification-service/internal/repository"
 )
 
-type Service struct {
+type AdminService struct {
 	notifRepo repository.NotificationRepository
 }
 
-func New(notifRepo repository.NotificationRepository) *Service {
-	return &Service{notifRepo: notifRepo}
+func New(notifRepo repository.NotificationRepository) *AdminService {
+	return &AdminService{notifRepo: notifRepo}
 }
 
-func (s *Service) GetByUserID(ctx context.Context, userID string) ([]models.NotificationResponse, error) {
+func (s *AdminService) GetByUserID(ctx context.Context, userID string) ([]models.NotificationResponse, error) {
 	const fc = "notification-service.services.GetByUserID"
 
 	notifications, err := s.notifRepo.GetByUserID(ctx, userID)
@@ -30,7 +30,7 @@ func (s *Service) GetByUserID(ctx context.Context, userID string) ([]models.Noti
 	return toResponses(notifications), nil
 }
 
-func (s *Service) GetByEmail(ctx context.Context, email string) ([]models.NotificationResponse, error) {
+func (s *AdminService) GetByEmail(ctx context.Context, email string) ([]models.NotificationResponse, error) {
 	const fc = "notification-service.services.GetByEmail"
 
 	notifications, err := s.notifRepo.GetByEmail(ctx, email)
