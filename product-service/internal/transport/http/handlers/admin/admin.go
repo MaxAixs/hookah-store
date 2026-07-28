@@ -14,7 +14,7 @@ type AdminHandler struct {
 	inventory  *InventoryHandlers
 }
 
-func NewAdminHandler(
+func New(
 	categoryService *category.CategoryService,
 	productService *product.ProductService,
 	inventoryService *inventory.InventoryService,

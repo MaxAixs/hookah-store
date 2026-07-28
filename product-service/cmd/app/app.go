@@ -61,8 +61,8 @@ func Start() {
 	productService := productservice.New(db, productRepo, productRepo)
 	inventoryService := inventoryservice.New(productRepo)
 
-	adminHandler := adminhandlers.NewAdminHandler(categoryService, productService, inventoryService)
-	userHandler := userhandlers.NewUserHandler(categoryService, productService)
+	adminHandler := adminhandlers.New(categoryService, productService, inventoryService)
+	userHandler := userhandlers.New(categoryService, productService)
 
 	httpServer := http.New(&cfg.HTTPServer, jwtCfg,
 		[]http.Handler{adminHandler},

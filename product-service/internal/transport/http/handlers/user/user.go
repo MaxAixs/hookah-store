@@ -12,7 +12,7 @@ type UserHandler struct {
 	products   *ProductHandler
 }
 
-func NewUserHandler(
+func New(
 	categoryService *category.CategoryService,
 	productService *product.ProductService,
 ) http.PublicHandler {
