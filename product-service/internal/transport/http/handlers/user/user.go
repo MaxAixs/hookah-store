@@ -1,8 +1,8 @@
 package user
 
 import (
-	categoryservice "github.com/anomalyco/hookah-store/product-service/internal/services/category"
-	productservice "github.com/anomalyco/hookah-store/product-service/internal/services/product"
+	"github.com/anomalyco/hookah-store/product-service/internal/services/category"
+	"github.com/anomalyco/hookah-store/product-service/internal/services/product"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +13,8 @@ type UserHandler struct {
 }
 
 func NewUserHandler(
-	categoryService *categoryservice.CategoryService,
-	productService *productservice.ProductService,
+	categoryService *category.CategoryService,
+	productService *product.ProductService,
 ) http.PublicHandler {
 	return &UserHandler{
 		categories: &CategoryHandler{categoryService: categoryService},

@@ -2,13 +2,13 @@ package user
 
 import (
 	"github.com/anomalyco/hookah-store/product-service/internal/errs"
-	categoryservice "github.com/anomalyco/hookah-store/product-service/internal/services/category"
+	"github.com/anomalyco/hookah-store/product-service/internal/services/category"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 )
 
 type CategoryHandler struct {
-	categoryService *categoryservice.CategoryService
+	categoryService *category.CategoryService
 }
 
 func (h *CategoryHandler) registerRoutes(router *gin.RouterGroup) {

@@ -3,14 +3,14 @@ package admin
 import (
 	"github.com/anomalyco/hookah-store/product-service/internal/errs"
 	"github.com/anomalyco/hookah-store/product-service/internal/models"
-	categoryservice "github.com/anomalyco/hookah-store/product-service/internal/services/category"
+	"github.com/anomalyco/hookah-store/product-service/internal/services/category"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type CategoryHandlers struct {
-	categoryService *categoryservice.CategoryService
+	categoryService *category.CategoryService
 }
 
 func (h *CategoryHandlers) registerRoutes(router *gin.RouterGroup) {

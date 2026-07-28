@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 
 	"github.com/anomalyco/hookah-store/notification-service/internal/models"
-	emailservice "github.com/anomalyco/hookah-store/notification-service/internal/services/email"
+	"github.com/anomalyco/hookah-store/notification-service/internal/services/email"
 	"github.com/anomalyco/hookah-store/notification-service/pkg/kafka"
 )
 
 type EmailHandler struct {
-	emailService *emailservice.EmailService
+	emailService *email.EmailService
 	topic        string
 }
 
-func New(service *emailservice.EmailService, topic string) *EmailHandler {
+func New(service *email.EmailService, topic string) *EmailHandler {
 	return &EmailHandler{
 		emailService: service,
 		topic:        topic,

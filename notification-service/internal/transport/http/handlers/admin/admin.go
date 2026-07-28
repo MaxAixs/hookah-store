@@ -1,16 +1,16 @@
 package admin
 
 import (
-	adminservice "github.com/anomalyco/hookah-store/notification-service/internal/services/admin"
+	"github.com/anomalyco/hookah-store/notification-service/internal/services/admin"
 	"github.com/anomalyco/hookah-store/notification-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 )
 
 type AdminHandlers struct {
-	adminService *adminservice.AdminService
+	adminService *admin.AdminService
 }
 
-func New(notifService *adminservice.AdminService) http.Handler {
+func New(notifService *admin.AdminService) http.Handler {
 	return &AdminHandlers{adminService: notifService}
 }
 

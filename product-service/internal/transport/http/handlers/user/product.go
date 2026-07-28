@@ -1,13 +1,13 @@
 package user
 
 import (
-	productservice "github.com/anomalyco/hookah-store/product-service/internal/services/product"
+	"github.com/anomalyco/hookah-store/product-service/internal/services/product"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 )
 
 type ProductHandler struct {
-	productService *productservice.ProductService
+	productService *product.ProductService
 }
 
 func (h *ProductHandler) registerRoutes(router *gin.RouterGroup) {

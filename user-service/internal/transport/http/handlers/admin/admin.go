@@ -3,17 +3,17 @@ package admin
 import (
 	"github.com/anomalyco/hookah-store/user-service/internal/errs"
 	"github.com/anomalyco/hookah-store/user-service/internal/models"
-	userservice "github.com/anomalyco/hookah-store/user-service/internal/services/user"
+	"github.com/anomalyco/hookah-store/user-service/internal/services/user"
 	"github.com/anomalyco/hookah-store/user-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type AdminHandlers struct {
-	userService *userservice.UserService
+	userService *user.UserService
 }
 
-func New(adminService *userservice.UserService) http.Handler {
+func New(adminService *user.UserService) http.Handler {
 	return &AdminHandlers{userService: adminService}
 }
 

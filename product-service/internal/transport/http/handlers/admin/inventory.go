@@ -3,14 +3,14 @@ package admin
 import (
 	"github.com/anomalyco/hookah-store/product-service/internal/errs"
 	"github.com/anomalyco/hookah-store/product-service/internal/models"
-	inventoryservice "github.com/anomalyco/hookah-store/product-service/internal/services/inventory"
+	"github.com/anomalyco/hookah-store/product-service/internal/services/inventory"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type InventoryHandlers struct {
-	inventoryService *inventoryservice.InventoryService
+	inventoryService *inventory.InventoryService
 }
 
 func (h *InventoryHandlers) registerRoutes(router *gin.RouterGroup) {
