@@ -17,7 +17,7 @@ import (
 	inventoryservice "github.com/anomalyco/hookah-store/product-service/internal/services/inventory"
 	productservice "github.com/anomalyco/hookah-store/product-service/internal/services/product"
 	"github.com/anomalyco/hookah-store/product-service/internal/transport/http"
-	"github.com/anomalyco/hookah-store/product-service/internal/transport/http/handlers/admin"
+	adminhandlers "github.com/anomalyco/hookah-store/product-service/internal/transport/http/handlers/admin"
 	userhandlers "github.com/anomalyco/hookah-store/product-service/internal/transport/http/handlers/user"
 	"github.com/anomalyco/hookah-store/product-service/pkg/database"
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
@@ -61,7 +61,7 @@ func Start() {
 	productService := productservice.New(db, productRepo, productRepo)
 	inventoryService := inventoryservice.New(productRepo)
 
-	adminHandler := admin.NewAdminHandler(categoryService, productService, inventoryService)
+	adminHandler := adminhandlers.NewAdminHandler(categoryService, productService, inventoryService)
 	userHandler := userhandlers.NewUserHandler(categoryService, productService)
 
 	httpServer := http.New(&cfg.HTTPServer, jwtCfg,

@@ -10,7 +10,7 @@ import (
 
 	"github.com/anomalyco/hookah-store/notification-service/internal/config"
 	"github.com/anomalyco/hookah-store/notification-service/internal/repository/postgres/notification"
-	"github.com/anomalyco/hookah-store/notification-service/internal/services/admin"
+	adminservice "github.com/anomalyco/hookah-store/notification-service/internal/services/admin"
 	emailservice "github.com/anomalyco/hookah-store/notification-service/internal/services/email"
 	"github.com/anomalyco/hookah-store/notification-service/internal/transport/http"
 	adminHandlers "github.com/anomalyco/hookah-store/notification-service/internal/transport/http/handlers/admin"
@@ -56,7 +56,7 @@ func Start() {
 
 	mailgunClient := mailgunpkg.New(cfg.MailGun)
 
-	adminService := admin.New(notifRepo)
+	adminService := adminservice.New(notifRepo)
 	emailService := emailservice.New(notifRepo, cfg.MailGun.WebhookSigningKey, mailgunClient)
 
 	jwtCfg := jwtpkg.New(cfg.JWT.Secret, cfg.JWT.TTL)

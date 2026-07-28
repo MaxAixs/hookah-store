@@ -15,7 +15,7 @@ import (
 	authservice "github.com/anomalyco/hookah-store/user-service/internal/services/auth"
 	userservice "github.com/anomalyco/hookah-store/user-service/internal/services/user"
 	"github.com/anomalyco/hookah-store/user-service/internal/transport/http"
-	"github.com/anomalyco/hookah-store/user-service/internal/transport/http/handlers/admin"
+	adminhandler "github.com/anomalyco/hookah-store/user-service/internal/transport/http/handlers/admin"
 	authhandler "github.com/anomalyco/hookah-store/user-service/internal/transport/http/handlers/auth"
 	"github.com/anomalyco/hookah-store/user-service/pkg/database"
 	jwtpkg "github.com/anomalyco/hookah-store/user-service/pkg/jwt"
@@ -63,7 +63,7 @@ func Start() {
 	authService := authservice.New(db, userRepo, userRepo, outboxRepo, jwtCfg)
 	userService := userservice.New(userRepo)
 
-	adminHandlers := admin.New(userService)
+	adminHandlers := adminhandler.New(userService)
 	authHandlers := authhandler.New(authService)
 
 	httpServer := http.New(&cfg.HTTPServer, jwtCfg, authHandlers, adminHandlers)
