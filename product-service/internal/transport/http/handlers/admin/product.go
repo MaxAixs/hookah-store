@@ -13,11 +13,7 @@ type ProductHandlers struct {
 	productService *productservice.ProductService
 }
 
-func NewProductHandlers(productService *productservice.ProductService) http.Handler {
-	return &ProductHandlers{productService: productService}
-}
-
-func (h *ProductHandlers) Register(router *gin.RouterGroup) {
+func (h *ProductHandlers) registerRoutes(router *gin.RouterGroup) {
 	productGroup := router.Group("/products")
 	{
 		productGroup.POST("", h.CreateProduct)
@@ -27,8 +23,6 @@ func (h *ProductHandlers) Register(router *gin.RouterGroup) {
 		productGroup.DELETE("/:id", h.DeleteProduct)
 	}
 }
-
-func (h *ProductHandlers) ShutDown() {}
 
 const paramProductID = "id"
 

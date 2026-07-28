@@ -13,11 +13,7 @@ type CategoryHandlers struct {
 	categoryService *categoryservice.CategoryService
 }
 
-func NewCategoryHandlers(categoryService *categoryservice.CategoryService) http.Handler {
-	return &CategoryHandlers{categoryService: categoryService}
-}
-
-func (h *CategoryHandlers) Register(router *gin.RouterGroup) {
+func (h *CategoryHandlers) registerRoutes(router *gin.RouterGroup) {
 	categoryGroup := router.Group("/categories")
 	{
 		categoryGroup.POST("", h.CreateCategory)
@@ -27,8 +23,6 @@ func (h *CategoryHandlers) Register(router *gin.RouterGroup) {
 		categoryGroup.DELETE("/:id", h.DeleteCategory)
 	}
 }
-
-func (h *CategoryHandlers) ShutDown() {}
 
 const paramCategoryID = "id"
 

@@ -13,11 +13,7 @@ type InventoryHandlers struct {
 	inventoryService *inventoryservice.InventoryService
 }
 
-func NewInventoryHandlers(inventoryService *inventoryservice.InventoryService) http.Handler {
-	return &InventoryHandlers{inventoryService: inventoryService}
-}
-
-func (h *InventoryHandlers) Register(router *gin.RouterGroup) {
+func (h *InventoryHandlers) registerRoutes(router *gin.RouterGroup) {
 	inventoryGroup := router.Group("/inventory")
 	{
 		inventoryGroup.GET("", h.GetAll)
@@ -25,8 +21,6 @@ func (h *InventoryHandlers) Register(router *gin.RouterGroup) {
 		inventoryGroup.PUT("/:id", h.UpdateInventoryProduct)
 	}
 }
-
-func (h *InventoryHandlers) ShutDown() {}
 
 const paramInventoryProductID = "id"
 
