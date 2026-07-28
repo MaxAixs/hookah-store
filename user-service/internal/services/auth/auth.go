@@ -20,14 +20,16 @@ import (
 type Service struct {
 	db         *sqlx.DB
 	outBoxRepo repository.OutBoxRepository
+	authRepo   repository.AuthRepository
 	userRepo   repository.UserRepository
 	validate   *validator.Validate
 	jwt        *jwtpkg.JwtConfig
 }
 
-func New(db *sqlx.DB, userRepo repository.UserRepository, outBoxRepo repository.OutBoxRepository, jwtCfg *jwtpkg.JwtConfig) *Service {
+func New(db *sqlx.DB, authRepo repository.AuthRepository, userRepo repository.UserRepository, outBoxRepo repository.OutBoxRepository, jwtCfg *jwtpkg.JwtConfig) *Service {
 	return &Service{
 		db:         db,
+		authRepo:   authRepo,
 		userRepo:   userRepo,
 		outBoxRepo: outBoxRepo,
 		validate:   validator.New(),
@@ -101,7 +103,7 @@ func (s *Service) SignIn(ctx context.Context, req models.AuthRequest) (string, e
 		return "", err
 	}
 
-	user, err := s.userRepo.GetByEmail(ctx, req.Email)
+	user, err := s.authRepo.GetByEmail(ctx, req.Email)
 	if err != nil {
 		slog.Error("failed to get user by email", slog.String("fc", fc), slog.Any("error", err))
 
@@ -133,7 +135,7 @@ func (s *Service) ResetPassword(ctx context.Context, req models.ResetPasswordReq
 		return err
 	}
 
-	user, err := s.userRepo.GetByEmail(ctx, req.Email)
+	user, err := s.authRepo.GetByEmail(ctx, req.Email)
 	if err != nil {
 		slog.Error("failed to get user", slog.String("fc", fc), slog.Any("error", err))
 
@@ -155,7 +157,7 @@ func (s *Service) ResetPassword(ctx context.Context, req models.ResetPasswordReq
 	}
 	defer tx.Rollback()
 
-	if err := s.userRepo.UpdatePassword(ctx, tx, req.Email, string(passwordHash)); err != nil {
+	if err := s.authRepo.UpdatePassword(ctx, tx, req.Email, string(passwordHash)); err != nil {
 		slog.Error("failed to update password", slog.String("fc", fc), slog.Any("error", err))
 
 		return errs.MapErr(err)
